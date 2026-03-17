@@ -1,0 +1,92 @@
+/* Estilos globales */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9fafb;
+  color: #333;
+}
+
+/* Contenedor principal */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Tarjetas reutilizables */
+.card {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Encabezados */
+h1, h2, h3 {
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+/* Botones */
+button {
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #1e40af;
+}
+
+/* Tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+table th, table td {
+  border: 1px solid #e5e7eb;
+  padding: 10px;
+  text-align: left;
+}
+
+table th {
+  background-color: #f3f4f6;
+  font-weight: bold;
+}
+
+/* Mensajes de estado */
+.loading {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.error {
+  color: #dc2626;
+  font-weight: bold;
+}
+
+.success {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+/* Estilos específicos para vistas */
+.order-detail-card,
+.sale-card {
+  composes: card;
+}
+
+.order-detail-card strong,
+.sale-card strong {
+  color: #374151;
+}
