@@ -49,7 +49,7 @@ export default function WaiterTablesPage() {
   };
 
   const goToOrder = (tableId: string) => {
-    router.push(`/waiter/`);
+    router.push(`/waiter/charge`);
   };
 
   if (loading) return <p className="p-10 text-center">Cargando panel de control...</p>;
