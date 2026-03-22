@@ -42,7 +42,7 @@ export default function SalesView() {
         date: "2026-03-12",
       },
     ];
-    setSales(demoSales);
+    setSales(demoSales); //error
   }, []);
 
   return (

@@ -17,7 +17,7 @@ export default function TableView({ tableId }: { tableId: string }) {
         const getTable = new GetTable(repo);
         const result = await getTable.execute(tableId);
         setTable(result);
-      } catch (err: any) {
+      } catch (err: any) {                                              //error
         setError(err.message || "Error fetching table");
       } finally {
         setLoading(false);

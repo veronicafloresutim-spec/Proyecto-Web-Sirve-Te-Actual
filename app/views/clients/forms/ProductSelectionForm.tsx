@@ -14,12 +14,14 @@ type Product = {
 export default function ProductSelectionForm() {
   const router = useRouter();
 
+  //no debe estar
   // Lista de productos (puedes reemplazar con datos de Supabase)
   const products: Product[] = [
     { id: "1", name: "Té Verde", description: "Refrescante y saludable", price: 25, category: "tea" },
     { id: "2", name: "Café Latte", description: "Suave y cremoso", price: 40, category: "coffee" },
     { id: "3", name: "Jugo de Naranja", description: "Natural y fresco", price: 30, category: "juice" },
   ];
+//debe usar datos de supabase
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);

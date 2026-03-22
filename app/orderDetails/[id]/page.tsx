@@ -13,13 +13,13 @@ type Product = {
 export default function WaiterOrder(){
 
   const [products,setProducts] = useState<Product[]>([]);
-  const [cart,setCart] = useState<any[]>([]);
+  const [cart,setCart] = useState<any[]>([]);// error
   const router = useRouter();
 
   useEffect(()=>{
-    loadProducts();
+    loadProducts();//error
   },[]);
-
+// esto debe de quitarse
   const loadProducts = async ()=>{
 
     const {data} = await supabase
@@ -29,6 +29,7 @@ export default function WaiterOrder(){
     setProducts(data || []);
 
   };
+  //y agarrar las funciones de abajo, me parece q las de modules
 
   const addProduct = (product:Product)=>{
 

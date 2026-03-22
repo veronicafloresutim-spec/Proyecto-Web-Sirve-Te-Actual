@@ -1,3 +1,5 @@
+//supuestamente este es el codigo q duplica
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -29,8 +31,10 @@ export default function ProductForm() {
   });
 
   useEffect(() => {
-    fetchProducts();
+    fetchProducts(); // tiene error en fetch
   }, []);
+
+  //estas partes son las q dice el profe felipe q no deben estar en ninguno de los codigos que estan en las carpetas de app
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -44,6 +48,8 @@ export default function ProductForm() {
     }
     setLoading(false);
   };
+
+  //que se ocupen las funciones de abajo en modules
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -63,7 +69,7 @@ export default function ProductForm() {
         .eq("id", editingId);
       if (!error) setEditingId(null);
     } else {
-      await supabase.from("productos").insert([formData]);
+      await supabase.from("productos").insert([formData]);//Siempre inserta, No valida si ya existe, No usa upsert
     }
 
     setFormData({ nombre: "", descripcion: "", precio: 0, categoria: "comida", imagen_url: "" });

@@ -17,7 +17,7 @@ export default function ProductView({ productId }: { productId: string }) {
         const getProduct = new GetProduct(repo);
         const result = await getProduct.execute(productId);
         setProduct(result);
-      } catch (err: any) {
+      } catch (err: any) {                                      //error
         setError(err.message || "Error fetching product");
       } finally {
         setLoading(false);

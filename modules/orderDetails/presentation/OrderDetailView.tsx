@@ -17,7 +17,7 @@ export default function OrderDetailView({ detailId }: { detailId: string }) {
         const getDetail = new GetOrderDetail(repo);
         const result = await getDetail.execute(detailId);
         setDetail(result);
-      } catch (err: any) {
+      } catch (err: any) {                                                   //error
         setError(err.message || "Error fetching order detail");
       } finally {
         setLoading(false);

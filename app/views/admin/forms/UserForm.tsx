@@ -26,9 +26,9 @@ export default function UserForm() {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(); //error
   }, []);
-
+//usar funciones de abajo
   const fetchUsers = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -40,7 +40,7 @@ export default function UserForm() {
     else setUsers(data || []);
     setLoading(false);
   };
-
+//usarlas modules
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };

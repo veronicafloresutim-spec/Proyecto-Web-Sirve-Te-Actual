@@ -17,15 +17,17 @@ export default function TableForm() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  //deben aparecer los datos del supabase
+
   const [formData, setFormData] = useState<Table>({
     numero: 1,
     estado: "libre",
   });
 
   useEffect(() => {
-    fetchTables();
+    fetchTables(); //error
   }, []);
-
+//usar datos de abajo
   const fetchTables = async () => {
     setLoading(true);
     const { data, error } = await supabase

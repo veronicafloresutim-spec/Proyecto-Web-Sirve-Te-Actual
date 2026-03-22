@@ -13,11 +13,13 @@ type CartItem = {
 export default function CheckoutForm() {
   const router = useRouter();
 
+//no debe estar
   // Carrito simulado (puedes reemplazar con datos de Supabase)
   const cart: CartItem[] = [
     { id: "1", name: "Té Verde", price: 25, quantity: 2 },
     { id: "2", name: "Café Latte", price: 40, quantity: 1 },
   ];
+  //debe funcionar con los datos del supabase
 
   // Mesa seleccionada (puedes obtenerla dinámicamente)
   const tableId: string | null = "Mesa 5";

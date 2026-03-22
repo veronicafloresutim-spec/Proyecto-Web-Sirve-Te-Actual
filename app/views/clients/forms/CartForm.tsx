@@ -13,11 +13,13 @@ type CartItem = {
 export default function CartForm() {
   const router = useRouter();
 
+  //porq estan?
   // Carrito inicial simulado (puedes reemplazar con datos de Supabase)
   const initialCart: CartItem[] = [
     { id: "1", name: "Té Verde", price: 25, quantity: 2 },
     { id: "2", name: "Café Latte", price: 40, quantity: 1 },
   ];
+  //deben de funcionar con los datos de supabase
 
   const [cart, setCart] = useState<CartItem[]>(initialCart);
 

@@ -17,6 +17,8 @@ export default function ChargeForm() {
     setTableId(localStorage.getItem("mesa_id"));
   }, []);
 
+  //no funciona
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tableId || amount <= 0) {
@@ -25,6 +27,8 @@ export default function ChargeForm() {
     }
 
     setLoading(true);
+
+    //no funciona
 
     try {
       // 1️⃣ Buscar el pedido activo (pendiente) de esa mesa
@@ -40,6 +44,8 @@ export default function ChargeForm() {
         setLoading(false);
         return;
       }
+
+    //no funciona
 
       // 2️⃣ Registrar el pago en la tabla 'pagos'
       const { error: pagoErr } = await supabase
@@ -58,6 +64,8 @@ export default function ChargeForm() {
         .from("pedidos")
         .update({ estado: "pagado" })
         .eq("id", pedido.id);
+
+        //no funciona
 
       // 4️⃣ Liberar la mesa automáticamente
       await supabase

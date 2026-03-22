@@ -17,7 +17,7 @@ export default function OrderView({ orderId }: { orderId: string }) {
         const getOrder = new GetOrder(repo);
         const result = await getOrder.execute(orderId);
         setOrder(result);
-      } catch (err: any) {
+      } catch (err: any) {                                         //error
         setError(err.message || "Error fetching order");
       } finally {
         setLoading(false);

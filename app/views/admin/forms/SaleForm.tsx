@@ -19,7 +19,7 @@ export default function DetallePedidoForm() {
   const router = useRouter();
 
   const [detalles, setDetalles] = useState<DetallePedido[]>([]);
-  const [productos, setProductos] = useState<any[]>([]);
+  const [productos, setProductos] = useState<any[]>([]);           //error
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -31,7 +31,7 @@ export default function DetallePedidoForm() {
   });
 
   useEffect(() => {
-    fetchInitialData();
+    fetchInitialData();   //error
   }, []);
 
   const fetchInitialData = async () => {
@@ -40,14 +40,16 @@ export default function DetallePedidoForm() {
     const { data: prodData } = await supabase.from("productos").select("*");
     setProductos(prodData || []);
 
+    //usar funciones de abajo
+
     // 2. Cargar Detalles con Join para ver el nombre del producto
     const { data: detData, error } = await supabase
       .from("detalle_pedido")
       .select(`*`);
 
     if (!error && detData) {
-      const formatted = detData.map((d: any) => ({
-        ...d,
+      const formatted = detData.map((d: any) => ({                                //error
+        ...d,  
         nombre_producto: d.productos?.nombre || "Producto eliminado",
         subtotal: d.cantidad * d.precio_unitario
       }));

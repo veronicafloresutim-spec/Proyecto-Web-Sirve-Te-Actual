@@ -14,8 +14,10 @@ export default function OrdersPage(){
   const [orders,setOrders] = useState<Order[]>([]);
 
   useEffect(()=>{
-    loadOrders();
+    loadOrders();//error
   },[]);
+
+  //porq tener supabase aqui
 
   const loadOrders = async ()=>{
 
@@ -27,6 +29,8 @@ export default function OrdersPage(){
     setOrders(data || []);
 
   };
+
+  //si se deben tomar las funciones de abajo, las de modules me parece
 
   const updateStatus = async(id:string,status:string)=>{
 

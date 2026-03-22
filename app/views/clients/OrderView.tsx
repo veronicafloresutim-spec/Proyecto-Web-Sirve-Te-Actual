@@ -25,6 +25,8 @@ export default function OrderView() {
     { id:string; name:string; price:number; quantity:number }[]
   >([]);
 
+  //no deben de estar
+
   // Cargar productos desde Supabase
   useEffect(()=>{
       
@@ -41,6 +43,8 @@ export default function OrderView() {
         console.error(error);
         return;
       }
+
+      //debe jalar los datos de abajo
 
       setProducts(data || []);
       setLoading(false);
@@ -132,7 +136,7 @@ if (!tableId || tableId === "null") {
 
     router.push("/clients/payment");
 
-  } catch (error: any) {
+  } catch (error: any) {                                 //error
 
     console.error("Error al guardar pedido:", error);
     alert("Error al guardar el pedido.");

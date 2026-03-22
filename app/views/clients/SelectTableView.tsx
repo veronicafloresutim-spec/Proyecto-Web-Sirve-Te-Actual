@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function SelectTable() {
-  const [tables, setTables] = useState<any[]>([]);
+  const [tables, setTables] = useState<any[]>([]); //error
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -18,7 +18,7 @@ export default function SelectTable() {
     loadTables();
   }, []);
 
-  const selectTable = (table: any) => {
+  const selectTable = (table: any) => {  //error
     if (table.estado !== "libre") {
       alert("Lo sentimos, esta mesa no está disponible en este momento.");
       return;

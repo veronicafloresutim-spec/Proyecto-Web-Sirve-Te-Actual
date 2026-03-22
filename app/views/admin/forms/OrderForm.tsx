@@ -12,7 +12,7 @@ export default function MasterOrderForm() {
   
   // Estados para datos de Supabase
   const [products, setProducts] = useState<Product[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);         // da error
   const [loading, setLoading] = useState(true);
 
   // Estados del Formulario (Cabecera)
@@ -23,9 +23,10 @@ export default function MasterOrderForm() {
   const [cart, setCart] = useState<OrderDetail[]>([]);
 
   useEffect(() => {
-    fetchInitialData();
+    fetchInitialData(); // da error
   }, []);
 
+  //quitar esto
   const fetchInitialData = async () => {
     setLoading(true);
     const { data: pData } = await supabase.from("productos").select("id, nombre, precio");
@@ -34,6 +35,7 @@ export default function MasterOrderForm() {
     setOrders(oData || []);
     setLoading(false);
   };
+//tomar las funciones de abajo
 
   const addToCart = (productId: string) => {
     const prod = products.find(p => p.id === productId);

@@ -5,12 +5,14 @@ import { supabase } from "../../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
 export default function WaiterTablesPage() {
-  const [tables, setTables] = useState<any[]>([]);
+  const [tables, setTables] = useState<any[]>([]); //error
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    loadTables();
+    loadTables(); //error
+
+    //si es lo mismo q las demas
     
     // SUSCRIPCIÓN EN TIEMPO REAL: Para que las mesas se actualicen solas
     const channel = supabase
@@ -22,10 +24,14 @@ export default function WaiterTablesPage() {
       )
       .subscribe();
 
+      //no debe estar, debe tomar las funciones de abajo
+
     return () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  //o esta es
 
   const loadTables = async () => {
     // Traemos las mesas y adjuntamos el último pedido pendiente si existe
@@ -38,6 +44,8 @@ export default function WaiterTablesPage() {
     setTables(data || []);
     setLoading(false);
   };
+
+  //la q debe tomar funciones de abajo
 
   const updateTableStatus = async (id: string, newStatus: string) => {
     const { error } = await supabase
@@ -68,7 +76,7 @@ export default function WaiterTablesPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {tables.map((table) => {
           // Buscamos si hay algún pedido que no esté pagado o finalizado
-          const activeOrder = table.pedidos?.find((p: any) => p.estado !== "pagado");
+          const activeOrder = table.pedidos?.find((p: any) => p.estado !== "pagado"); //error
 
           return (
             <div

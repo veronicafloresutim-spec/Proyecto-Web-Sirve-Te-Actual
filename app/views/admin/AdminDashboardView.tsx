@@ -25,16 +25,16 @@ export default function AdminDashboardView() {
 
       <div className="dashboard-section">
         {section === "users" && (
-          <UserForm onCancel={() => setSection(null)} />
+          <UserForm onCancel={() => setSection(null)} /> // error
         )}
         {section === "products" && (
-          <ProductForm onCancel={() => setSection(null)} />
+          <ProductForm onCancel={() => setSection(null)} /> // error
         )}
         {section === "tables" && (
-          <TableForm onCancel={() => setSection(null)} />
+          <TableForm onCancel={() => setSection(null)} /> //error
         )}
         {section === "orders" && (
-          <OrderForm onCancel={() => setSection(null)} />
+          <OrderForm onCancel={() => setSection(null)} /> //error
         )}
       </div>
     </div>

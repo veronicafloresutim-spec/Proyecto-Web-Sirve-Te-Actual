@@ -17,7 +17,7 @@ export default function SaleView({ saleId }: { saleId: string }) {
         const getSale = new GetSale(repo);
         const result = await getSale.execute(saleId);
         setSale(result);
-      } catch (err: any) {
+      } catch (err: any) {                                   //error
         setError(err.message || "Error fetching sale");
       } finally {
         setLoading(false);

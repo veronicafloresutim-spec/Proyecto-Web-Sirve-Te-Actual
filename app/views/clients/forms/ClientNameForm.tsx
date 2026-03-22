@@ -1,3 +1,5 @@
+//no funciona, en ningun lado pide el nombre del cliente
+
 "use client";
 
 import { useState } from "react";

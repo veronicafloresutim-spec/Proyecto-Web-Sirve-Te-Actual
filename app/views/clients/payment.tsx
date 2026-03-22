@@ -1,3 +1,5 @@
+//si es el de pagar, no funciona
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -40,7 +42,7 @@ export default function PaymentPage() {
     precio_unitario,
     productos(nombre)
   `)
-  .eq("pedido_id", pedido_id) as { data: Item[] | null, error: any };
+  .eq("pedido_id", pedido_id) as { data: Item[] | null, error: any }; //error
 
     if (error) {
       console.error("Error cargando detalle:", error);
@@ -97,7 +99,7 @@ if (errPed) throw new Error("No se pudo encontrar la mesa del pedido");
       alert("¡Gracias por su visita! Pago procesado y mesa liberada.");
       router.push("/"); // Volver al inicio
 
-    } catch (err: any) {
+    } catch (err: any) { //error
       console.error(err);
       alert("Error en el proceso: " + err.message);
     } finally {
