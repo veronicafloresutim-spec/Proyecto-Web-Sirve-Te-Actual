@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 type Product = {
@@ -12,62 +12,51 @@ type Product = {
   categoria: string;
 };
 
+type CartItem = {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+};
+
 export default function OrderView() {
-
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const [products,setProducts] = useState<Product[]>([]);
-  const [loading,setLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [tableId, setTableId] = useState<string | null>(null);
+  const [cart, setCart] = useState<CartItem[]>([]);
 
-  const [cart,setCart] = useState<
-    { id:string; name:string; price:number; quantity:number }[]
-  >([]);
-
-  //no deben de estar
-
-  // Cargar productos desde Supabase
-  useEffect(()=>{
-      
+  useEffect(() => {
     const savedTableId = localStorage.getItem("mesa_id");
 
-    const loadProducts = async ()=>{
-
+    const loadProducts = async () => {
       const { data, error } = await supabase
         .from("productos")
         .select("*")
         .order("categoria");
 
-      if(error){
+      if (error) {
         console.error(error);
         return;
       }
 
-      //debe jalar los datos de abajo
-
       setProducts(data || []);
       setLoading(false);
       setTableId(savedTableId);
-
     };
 
     loadProducts();
-
-  },[]);
+  }, []);
 
   const addToCart = (product: Product) => {
+    setCart((prevCart) => {
+      const existing = prevCart.find((item) => item.id === product.id);
 
-    setCart((prevCart)=>{
-
-      const existing = prevCart.find(
-        (item)=>item.id === product.id
-      );
-
-      if(existing){
-        return prevCart.map((item)=>
+      if (existing) {
+        return prevCart.map((item) =>
           item.id === product.id
-            ? { ...item, quantity:item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
@@ -78,148 +67,151 @@ export default function OrderView() {
           id: product.id,
           name: product.nombre,
           price: product.precio,
-          quantity: 1
-        }
+          quantity: 1,
+        },
       ];
-
     });
-
   };
 
-  const total = cart.reduce(
-    (sum,item)=> sum + item.price * item.quantity,
-    0
-  );
-const handleCheckout = async () => {
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-if (!tableId || tableId === "null") {
-    alert("Error: No se ha detectado la mesa.");
-    return;
-  }
-
-  try {
-
-    const { data: { user } } = await supabase.auth.getUser();
-
-    const { data: pedidoData, error: pedidoError } = await supabase
-      .from("pedidos")
-      .insert([{
-        mesa_id: tableId,
-        cliente_id: user?.id || null,
-        estado: "pendiente"
-      }])
-      .select()
-      .single();
-
-    if (pedidoError) throw pedidoError;
-
-    if (!pedidoData) {
-      throw new Error("No se pudo crear el pedido");
+  const handleCheckout = async () => {
+    if (!tableId || tableId === "null") {
+      alert("Error: No se ha detectado la mesa.");
+      return;
     }
 
-    const detalles = cart.map((item) => ({
-      pedido_id: pedidoData.id,
-      cantidad: item.quantity,
-      precio_unitario: item.price,
-      producto_id: item.id,
-    }));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
 
-    const { error: detallesError } = await supabase
-      .from("detalle_pedido")
-      .insert(detalles);
+      const { data: pedidoData, error: pedidoError } = await supabase
+        .from("pedidos")
+        .insert([
+          {
+            mesa_id: tableId,
+            cliente_id: user?.id || null,
+            estado: "pendiente",
+          },
+        ])
+        .select()
+        .single();
 
-    if (detallesError) throw detallesError;
+      if (pedidoError) throw pedidoError;
+      if (!pedidoData) throw new Error("No se pudo crear el pedido");
 
-    localStorage.setItem("pedido_id", pedidoData.id);
+      const detalles = cart.map((item) => ({
+        pedido_id: pedidoData.id,
+        cantidad: item.quantity,
+        precio_unitario: item.price,
+        producto_id: item.id,
+      }));
 
-    setCart([]); // limpiar carrito
+      const { error: detallesError } = await supabase
+        .from("detalle_pedido")
+        .insert(detalles);
 
-    router.push("/clients/payment");
+      if (detallesError) throw detallesError;
 
-  } catch (error: any) {                                 //error
+      localStorage.setItem("pedido_id", pedidoData.id);
+      setCart([]);
 
-    console.error("Error al guardar pedido:", error);
-    alert("Error al guardar el pedido.");
+      router.push("/clients/payment");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error al guardar pedido:", error.message);
+        alert("Error al guardar el pedido: " + error.message);
+      } else {
+        console.error("Error desconocido:", error);
+        alert("Error inesperado al guardar el pedido.");
+      }
+    }
+  };
 
-  }
+  const handleEditOrder = () => {
+    alert("Funcionalidad de edición de pedido en construcción.");
+  };
 
-};
-  if (loading) return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-    </div>
-  );
+  const handleCancelOrder = () => {
+    setCart([]);
+    alert("Pedido cancelado.");
+    router.push("/clients/select-table");
+  };
 
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    );
 
   return (
+    <div className="app-main p-6">
+      <h2 className="text-2xl font-bold mb-4">Menú del Restaurante</h2>
 
-    <div className="app-main">
+      {tableId && <p className="mb-4">Mesa seleccionada: {tableId}</p>}
 
-      <h2>Menú del Restaurante</h2>
-
-      {tableId && <p>Mesa seleccionada: {tableId}</p>}
-
-      <div className="products-list">
-
-        {products.map((product)=> (
-
-          <div key={product.id} className="product-card">
-
-            <h3>{product.nombre}</h3>
-
+      <div className="products-list grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        {products.map((product) => (
+          <div key={product.id} className="product-card p-4 border rounded shadow">
+            <h3 className="font-bold">{product.nombre}</h3>
             <p>{product.descripcion}</p>
-
             <p>
               <strong>${product.precio.toFixed(2)}</strong>
             </p>
-
             <button
-              onClick={()=>addToCart(product)}
+              onClick={() => addToCart(product)}
+              className="mt-2 px-3 py-1 bg-green-500 text-white rounded"
             >
               Agregar
             </button>
-
           </div>
-
         ))}
-
       </div>
 
-      <div className="cart-summary">
-
-        <h3>Carrito</h3>
+      <div className="cart-summary border-t pt-4">
+        <h3 className="text-xl font-bold mb-2">Carrito</h3>
 
         {cart.length === 0 ? (
           <p>No hay productos.</p>
         ) : (
-
-          <ul>
-
-            {cart.map((item)=>(
+          <ul className="mb-2">
+            {cart.map((item) => (
               <li key={item.id}>
-                {item.name} x {item.quantity}
-                = ${(item.price * item.quantity).toFixed(2)}
+                {item.name} x {item.quantity} = $
+                {(item.price * item.quantity).toFixed(2)}
               </li>
             ))}
-
           </ul>
-
         )}
 
-        <p>
+        <p className="mb-4">
           <strong>Total: ${total.toFixed(2)}</strong>
         </p>
 
-        <button
-          onClick={handleCheckout}
-          disabled={cart.length === 0}
-        >
-          Ir al carrito
-        </button>
-
+        <div className="flex gap-4">
+          <button
+            onClick={handleCheckout}
+            disabled={cart.length === 0}
+            className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
+          >
+            Confirmar Pedido
+          </button>
+          <button
+            onClick={handleEditOrder}
+            disabled={cart.length === 0}
+            className="px-4 py-2 bg-yellow-500 text-white rounded disabled:bg-gray-300"
+          >
+            Editar Pedido
+          </button>
+          <button
+            onClick={handleCancelOrder}
+            disabled={cart.length === 0}
+            className="px-4 py-2 bg-red-500 text-white rounded disabled:bg-gray-300"
+          >
+            Cancelar Pedido
+          </button>
+        </div>
       </div>
-
     </div>
-
   );
 }

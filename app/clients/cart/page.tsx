@@ -1,5 +1,6 @@
-import CartView from "../../views/clients/CartView";// da error
+import CartForm from "@/app/views/clients/forms/CartForm";
+
 
 export default function CartPage() {
-  return <CartView />;
+  return <CartForm />;
 }

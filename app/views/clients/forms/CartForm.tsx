@@ -1,49 +1,125 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 type CartItem = {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
+  producto_id: string;
+  cantidad: number;
+  precio_unitario: number;
+  productos: { nombre: string } | null;
 };
 
 export default function CartForm() {
   const router = useRouter();
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  //porq estan?
-  // Carrito inicial simulado (puedes reemplazar con datos de Supabase)
-  const initialCart: CartItem[] = [
-    { id: "1", name: "Té Verde", price: 25, quantity: 2 },
-    { id: "2", name: "Café Latte", price: 40, quantity: 1 },
-  ];
-  //deben de funcionar con los datos de supabase
+  useEffect(() => {
+    const pedidoId = localStorage.getItem("pedido_id");
+    if (!pedidoId) {
+      alert("No se encontró un pedido activo.");
+      router.push("/clients");
+      return;
+    }
 
-  const [cart, setCart] = useState<CartItem[]>(initialCart);
+    const loadCart = async () => {
+      const { data, error } = await supabase
+        .from("detalle_pedido")
+        .select(`
+          producto_id,
+          cantidad,
+          precio_unitario,
+          productos(nombre)
+        `)
+        .eq("pedido_id", pedidoId);
+
+      if (error) {
+        console.error("Error cargando carrito:", error);
+        return;
+      }
+
+      const rawData = (Array.isArray(data) ? data : []) as unknown[];
+
+      const typedData: CartItem[] = rawData.map((rowUnknown) => {
+        const row = rowUnknown as {
+          producto_id: string | number;
+          cantidad: string | number;
+          precio_unitario: string | number;
+          productos: { nombre: string }[] | null;
+        };
+
+        return {
+          producto_id: String(row.producto_id),
+          cantidad: Number(row.cantidad),
+          precio_unitario: Number(row.precio_unitario),
+          productos: Array.isArray(row.productos)
+            ? row.productos[0] ?? null
+            : row.productos,
+        };
+      });
+
+      setCart(typedData);
+      setLoading(false);
+    };
+
+    loadCart();
+  }, [router]);
 
   const calculateTotal = () =>
-    cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    cart.reduce((sum, item) => sum + item.precio_unitario * item.cantidad, 0);
 
-  const updateQuantity = (id: string, delta: number) => {
+  const updateQuantity = async (producto_id: string, delta: number) => {
+    const pedidoId = localStorage.getItem("pedido_id");
+    if (!pedidoId) return;
+
+    const item = cart.find((i) => i.producto_id === producto_id);
+    if (!item) return;
+
+    const newQuantity = Math.max(1, item.cantidad + delta);
+
+    const { error } = await supabase
+      .from("detalle_pedido")
+      .update({ cantidad: newQuantity })
+      .eq("pedido_id", pedidoId)
+      .eq("producto_id", producto_id);
+
+    if (error) {
+      console.error("Error actualizando cantidad:", error);
+      return;
+    }
+
     setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
+      prevCart.map((i) =>
+        i.producto_id === producto_id ? { ...i, cantidad: newQuantity } : i
       )
     );
   };
 
-  const removeItem = (id: string) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+  const removeItem = async (producto_id: string) => {
+    const pedidoId = localStorage.getItem("pedido_id");
+    if (!pedidoId) return;
+
+    const { error } = await supabase
+      .from("detalle_pedido")
+      .delete()
+      .eq("pedido_id", pedidoId)
+      .eq("producto_id", producto_id);
+
+    if (error) {
+      console.error("Error eliminando producto:", error);
+      return;
+    }
+
+    setCart((prevCart) => prevCart.filter((i) => i.producto_id !== producto_id));
   };
 
-  const handleCheckout = (cart: CartItem[]) => {
-    alert(`Orden confirmada con ${cart.length} productos. Total: $${calculateTotal().toFixed(2)}`);
-    // Aquí podrías guardar en Supabase o redirigir
-    router.push("/clients");
+  const handleCheckout = async () => {
+    alert(
+      `Orden confirmada con ${cart.length} productos. Total: $${calculateTotal().toFixed(2)}`
+    );
+    router.push("/checkout"); // redirige al formulario de pago
   };
 
   const handleCancel = () => {
@@ -53,33 +129,50 @@ export default function CartForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) {
-      alert("Your cart is empty.");
+      alert("Tu carrito está vacío.");
       return;
     }
-    handleCheckout(cart);
+    handleCheckout();
   };
 
+  if (loading) {
+    return <p className="text-center">Cargando carrito...</p>;
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="crud-form">
-      <h3>Your Cart</h3>
+    <form onSubmit={handleSubmit} className="crud-form p-6 max-w-md mx-auto">
+      <h3 className="text-xl font-bold mb-4">Tu Carrito</h3>
 
       {cart.length === 0 ? (
-        <p>No items in cart.</p>
+        <p>No hay productos en el carrito.</p>
       ) : (
-        <ul>
+        <ul className="mb-4">
           {cart.map((item) => (
-            <li key={item.id}>
-              {item.name} - ${item.price.toFixed(2)} x {item.quantity} = $
-              {(item.price * item.quantity).toFixed(2)}
-              <div className="cart-actions">
-                <button type="button" onClick={() => updateQuantity(item.id, 1)}>
+            <li key={item.producto_id} className="mb-2">
+              {item.productos?.nombre} - ${item.precio_unitario.toFixed(2)} x{" "}
+              {item.cantidad} = $
+              {(item.precio_unitario * item.cantidad).toFixed(2)}
+              <div className="cart-actions flex gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => updateQuantity(item.producto_id, 1)}
+                  className="px-2 py-1 bg-green-500 text-white rounded"
+                >
                   +
                 </button>
-                <button type="button" onClick={() => updateQuantity(item.id, -1)}>
+                <button
+                  type="button"
+                  onClick={() => updateQuantity(item.producto_id, -1)}
+                  className="px-2 py-1 bg-yellow-500 text-white rounded"
+                >
                   -
                 </button>
-                <button type="button" onClick={() => removeItem(item.id)}>
-                  Remove
+                <button
+                  type="button"
+                  onClick={() => removeItem(item.producto_id)}
+                  className="px-2 py-1 bg-red-500 text-white rounded"
+                >
+                  Eliminar
                 </button>
               </div>
             </li>
@@ -87,11 +180,40 @@ export default function CartForm() {
         </ul>
       )}
 
-      <h4>Total: ${calculateTotal().toFixed(2)}</h4>
+      <h4 className="font-bold mb-4">Total: ${calculateTotal().toFixed(2)}</h4>
 
-      <div className="form-actions">
-        <button type="submit">Confirm Order</button>
-        <button type="button" onClick={handleCancel}>Cancel</button>
+      <div className="form-actions flex gap-4">
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Confirmar Pedido
+        </button>
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="px-4 py-2 bg-gray-400 text-white rounded"
+        >
+          Cancelar
+        </button>
+      </div>
+
+      {/* Botones de navegación */}
+      <div className="flex justify-center gap-4 mt-6">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="px-4 py-2 bg-gray-300 rounded"
+        >
+          Atrás
+        </button>
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          className="px-4 py-2 bg-green-600 text-white rounded"
+        >
+          Inicio
+        </button>
       </div>
     </form>
   );
